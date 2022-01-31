@@ -1,0 +1,65 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: ${clustername}
+spec:
+  hosts:
+  %{ for spec in controller_addrs }
+  - ssh:
+      address: ${spec.addr}
+      user: root
+      port: 22
+    %{ if spec.private_interface != "" }
+    privateInterface: ${ spec.private_interface }
+    %{ endif }
+    role: controller
+  %{ endfor }
+
+  %{ for spec in worker_addrs }
+  - ssh:
+      address: ${spec.addr}
+      user: root
+      port: 22
+    %{ if spec.private_interface != "" }
+    privateInterface: ${ spec.private_interface }
+    %{ endif }
+    role: worker
+    installFlags:
+    %{ for flag in worker_install_flags }
+    - ${flag}
+    %{ endfor }
+  %{ endfor }
+
+  %{ for spec in controller_worker_addrs }
+  - ssh:
+      address: ${spec.addr}
+      user: root
+      port: 22
+    %{ if spec.private_interface != "" }
+    privateInterface: ${ spec.private_interface }
+    %{ endif }
+    role: controller+worker
+    installFlags:
+    %{ for flag in worker_install_flags }
+    - ${flag}
+    %{ endfor }
+  %{ endfor }
+
+  k0s:
+    version: ${version}
+    config:
+      kind: Cluster
+      metadata:
+        name: k0s
+      spec:
+        network:
+          provider: calico
+          calico:
+            wireguard: true
+        api:
+          externalAddress: ${kubeapiIp}
+          sans:
+            - ${kubeapiIp}
+            %{ for sans in extra_sans }
+            - ${sans}
+            %{ endfor }
