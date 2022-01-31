@@ -38,3 +38,4 @@ variable "extra_sans" {
   type = list(string)
   default = []
 }
+variable "kubeapiIpPublicOverride" {}
