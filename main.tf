@@ -11,7 +11,7 @@ resource "null_resource" "k0sctl_apply" {
 data "external" "k0sctl_apply" {
   program = ["${path.module}/k0sctl_kubeconfig.sh"]
   query = {
-    kubeapiIp = try(var.kubeapiIpPublicOverride, var.kubeapiIp)
+    kubeapiIp = var.kubeapiIpPublicOverride == null ? var.kubeapiIp : var.kubeapiIpPublicOverride
   }
 
   depends_on = [null_resource.k0sctl_apply, local_file.k0sctl_yaml]
