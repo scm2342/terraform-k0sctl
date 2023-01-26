@@ -13,6 +13,13 @@ spec:
     privateInterface: ${ spec.private_interface }
     %{ endif }
     role: controller
+    hooks:
+      apply:
+        before:
+        %{ if airgapped_images }
+        - mkdir -p /var/lib/k0s/images
+        - curl -sLo /var/lib/k0s/images/bundle_file https://github.com/k0sproject/k0s/releases/download/${version}/k0s-airgap-bundle-${version}-amd64
+        %{ endif }
   %{ endfor }
 
   %{ for spec in worker_addrs }
@@ -28,6 +35,13 @@ spec:
     %{ for flag in worker_install_flags }
     - ${flag}
     %{ endfor }
+    hooks:
+      apply:
+        before:
+        %{ if airgapped_images }
+        - mkdir -p /var/lib/k0s/images
+        - curl -sLo /var/lib/k0s/images/bundle_file https://github.com/k0sproject/k0s/releases/download/${version}/k0s-airgap-bundle-${version}-amd64
+        %{ endif }
   %{ endfor }
 
   %{ for spec in controller_worker_addrs }
@@ -38,11 +52,22 @@ spec:
     %{ if spec.private_interface != "" }
     privateInterface: ${ spec.private_interface }
     %{ endif }
+    %{ if length(controller_worker_addrs) == 1 }
+    role: single
+    %{ else }
     role: controller+worker
+    %{ endif }
     installFlags:
     %{ for flag in worker_install_flags }
     - ${flag}
     %{ endfor }
+    hooks:
+      apply:
+        before:
+        %{ if airgapped_images }
+        - mkdir -p /var/lib/k0s/images
+        - curl -sLo /var/lib/k0s/images/bundle_file https://github.com/k0sproject/k0s/releases/download/${version}/k0s-airgap-bundle-${version}-amd64
+        %{ endif }
   %{ endfor }
 
   k0s:
@@ -52,6 +77,10 @@ spec:
       metadata:
         name: k0s
       spec:
+        images:
+        %{ if airgapped_images }
+          default_pull_policy: Never
+        %{ endif }
         network:
           provider: calico
           calico:

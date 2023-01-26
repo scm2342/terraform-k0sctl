@@ -8,5 +8,6 @@ locals {
     kubeapiIp = var.kubeapiIp
     worker_install_flags = var.worker_install_flags
     extra_sans = var.extra_sans
+    airgapped_images = var.airgapped_images
   })
 }
