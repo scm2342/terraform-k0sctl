@@ -4,7 +4,7 @@ variable "clustername" {
 }
 variable "k0s_version" {
   type = string
-  default = "1.22.2+k0s.2"
+  default = "1.24.9+k0s.0"
 }
 variable "kubeapiIp" {
   type = string
@@ -40,4 +40,7 @@ variable "extra_sans" {
 }
 variable "kubeapiIpPublicOverride" {
   default = null
+}
+variable "airgapped_images" {
+  default = false
 }
